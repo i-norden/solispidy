@@ -49,6 +49,7 @@ func Tokenize(program string) (Lines, error) {
 		tempStr = strings.Replace(line.Text, "(", "( ", -1)
 		tempStr = strings.Replace(tempStr, ")", " )", -1)
 		line.Tokens = strings.Split(tempStr, " ")
+		line.Tokens = delete_empty(line.Tokens)
 	}
 
 	return linesOfInterest, nil
@@ -56,6 +57,16 @@ func Tokenize(program string) (Lines, error) {
 
 func remove(slice []string, s int) []string {
 	return append(slice[:s], slice[s+1:]...)
+}
+
+func delete_empty (s []string) []string {
+	var r []string
+	for _, str := range s {
+		if str != "" {
+			r = append(r, str)
+		}
+	}
+	return r
 }
 
 func split(r rune) bool {
