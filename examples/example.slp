@@ -1,0 +1,17 @@
+
+; A simple contract allowing users to add and subtract a shared counter
+(def-contract Counter
+
+  (defpub Uint account 0)
+
+  (defn incAccount
+    ((Uint amount))
+    (set account (+ account amount)))
+
+  (defn decAccount
+    ((Uint amount))
+    (ife (=< amount account)
+      (set account (- account amount))
+      (set account 0)))
+
+)
