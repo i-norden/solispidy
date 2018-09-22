@@ -3,6 +3,7 @@ package main
 import "io/ioutil"
 import "os"
 import "fmt"
+import "../parser"
 
 
 
@@ -10,10 +11,9 @@ import "fmt"
 
 
 func loadSourceFiles (files []string) ([]string, error) {
-  numfiles := len(files)
   var filetexts []string
-  for i := 0; i < numfiles; i++ {
-    text, err:= ioutil.ReadFile(files[i])
+  for _, file := range files {
+    text, err:= ioutil.ReadFile(file)
     if(err != nil){
       out := []string{}
       return out, err
@@ -39,11 +39,24 @@ func main(){
 
   fmt.Println(files)
 
-  _, errs := loadSourceFiles(files)
+  texts, errs := loadSourceFiles(files)
 
   if(errs != nil){
     fmt.Println(errs)
+    return
   }else{
     fmt.Println("Files loaded successfully.")
   }
+
+
+  for _, text := range texts {
+    lines, errs := parser.Tokenize(text)
+    if(errs != nil){
+      fmt.Println(errs)
+      return
+    }else{
+      fmt.Println(lines)
+    }
+  }
+
 }

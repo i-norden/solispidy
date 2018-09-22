@@ -1,0 +1,9 @@
+
+
+(def-contract CheckZero
+
+  (defpub Uint var 0)
+  (defn checkvar
+    ()
+    var)
+)
