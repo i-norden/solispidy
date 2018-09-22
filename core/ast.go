@@ -69,6 +69,14 @@ type CnstBool struct{
 
 
 
+type Symbol struct{
+  symbol string
+}
+
+
+
+
+
 type SymbolTable struct{
   fndefs     []AST
   tydefs     []AST
