@@ -1,6 +1,13 @@
 package parser
 
-import "strings"
+import (
+	"strings"
+	"errors"
+)
+
+// recognize unclosed paranthesis
+// recognize strings
+
 
 type Line struct {
 	Text   string
@@ -8,30 +15,43 @@ type Line struct {
 	Number int
 }
 
-type Lines []Line
+type Lines []*Line
 
-func Tokenize(program string) Lines {
-	var allLines Lines
+func Tokenize(program string) (Lines, error) {
+
+	leftPars := strings.Count(program, "(")
+	rightPars := strings.Count(program, ")")
+	if rightPars > leftPars {
+		return nil, errors.New("Missing opening parenthesis")
+	}
+	if leftPars > rightPars {
+		return nil, errors.New("Missing closing parenthesis")
+	}
+
 	var linesOfInterest Lines
 
 	lines := strings.Split(program, "\n")
+
 	for i, line := range lines {
 
-		allLines[i] = Line{
+		l := Line{
 			Text: line,
 			Number: i,
 		}
 
 		if string(line[0]) != ";" {
-			linesOfInterest = append(linesOfInterest, allLines[i])
+			linesOfInterest = append(linesOfInterest, &l)
 		}
 	}
 
 	for _, line := range linesOfInterest {
-		line.Tokens = strings.FieldsFunc(line.Text, split)
+		var tempStr string
+		tempStr = strings.Replace(line.Text, "(", "( ", -1)
+		tempStr = strings.Replace(tempStr, ")", " )", -1)
+		line.Tokens = strings.Split(tempStr, " ")
 	}
 
-	return linesOfInterest
+	return linesOfInterest, nil
 }
 
 func remove(slice []string, s int) []string {
