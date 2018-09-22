@@ -55,7 +55,9 @@ func main(){
       fmt.Println(errs)
       return
     }else{
-      fmt.Println(lines)
+      for _, line := range lines {
+        fmt.Println(line)
+      }
     }
   }
 

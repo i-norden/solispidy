@@ -39,7 +39,7 @@ func Tokenize(program string) (Lines, error) {
 			Number: i,
 		}
 
-		if string(line[0]) != ";" {
+		if (line != "") && (string(line[0]) != ";") {
 			linesOfInterest = append(linesOfInterest, &l)
 		}
 	}
