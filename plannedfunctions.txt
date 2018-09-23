@@ -17,6 +17,7 @@ and
 not
 or
 xor
+let
 len
 index
 get

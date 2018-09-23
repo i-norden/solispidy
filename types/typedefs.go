@@ -3,6 +3,7 @@ package types
 type TyVal int
 
 const (
+  TY_NIL  TyVal = iota  // This is an empty type, as a default for values with as-of-yet-undetermined types
 	TY_INT  TyVal = iota
 	TY_STR  TyVal = iota
 	TY_BOOL TyVal = iota

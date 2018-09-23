@@ -16,26 +16,8 @@ type Symbol interface {
 	GetLine() int64
 }
 
-type LeftPar struct {
-    RPId int64
-    Line int64
-}
-
-func (f LeftPar) GetLine() int64 {
-  return f.Line
-}
-
-type RightPar struct {
-    LPId int64
-    Line int64
-}
-
-func (f RightPar) GetLine() int64 {
-  return f.Line
-}
-
 type FnId struct {
-	FnId int64
+	Fnid int64
 	Line int64
 }
 
@@ -44,7 +26,7 @@ func (f FnId) GetLine() int64 {
 }
 
 type TyId struct {
-	TyId int64
+	Tyid int64
 	Line int64
 }
 
@@ -53,7 +35,7 @@ func (f TyId) GetLine() int64 {
 }
 
 type AssertId struct {
-	AssertId int64
+	Assertid int64
 	Line     int64
 }
 
@@ -104,4 +86,166 @@ type TySymbol struct {
 
 func (f TySymbol) GetLine() int64 {
 	return f.Line
+}
+
+
+
+
+
+
+
+
+
+
+
+type Operation int64
+const (
+  OP_ADD Operation = iota
+  OP_SUB Operation = iota
+  OP_MUL Operation = iota
+  OP_DIV Operation = iota
+  OP_MOD Operation = iota
+  OP_AND Operation = iota
+  OP_OR  Operation = iota
+  OP_XOR Operation = iota
+  OP_NOT Operation = iota
+  OP_LSS Operation = iota
+  OP_GTR Operation = iota
+  OP_EQ  Operation = iota
+  OP_NEQ Operation = iota
+  OP_NZR Operation = iota
+  OP_ONE Operation = iota
+  OP_ZR  Operation = iota
+)
+
+
+type FnNode struct{
+  Line     int64
+  Symbol   int64
+  Inpars   []TypeNote
+  Expars   []TypeNote
+  IsPublic bool
+  Def      *Symbol
+}
+
+func (f FnNode) GetLine() int64 {
+  return f.Line
+}
+
+type LetNode struct{
+  Line   int64
+  Vars   []VarNode
+  Def    *Symbol
+}
+
+func (l LetNode) GetLine() int64 {
+  return l.Line
+}
+
+type OpNode struct{
+  Line   int64
+  Op     Operation
+  Pars   []Symbol
+}
+
+func (o OpNode) GetLine() int64 {
+  return o.Line
+}
+
+type PairNode struct{
+  A    *Symbol
+  B    *Symbol
+  Line int64
+}
+
+func (p PairNode) GetLine() int64{
+  return p.Line
+}
+
+type VarNode struct{
+	Line   int64
+  Symbol int64
+  Type   TypeNote
+  Def    *Symbol
+}
+
+func (v VarNode) GetLine() int64{
+  return v.Line
+}
+
+type ContractNode struct{
+  Line    int64
+  Funcs   []FnNode
+  Types   []TyNode
+  Vars    []VarNode
+  Asserts []AssertNode
+}
+
+func (c ContractNode) GetLine() int64{
+  return c.Line
+}
+
+
+
+type HigherOrder int64
+const (
+  MAP_HOF   HigherOrder = iota
+  REDUC_HOF HigherOrder = iota
+  MPRED_HOF HigherOrder = iota
+  FILTR_HOF HigherOrder = iota
+  LOOP_HOP  HigherOrder = iota
+)
+
+type HOFNode struct{
+  Line   int64
+  Inpars []Symbol
+  HoFOp  HigherOrder
+}
+
+func (h HOFNode) GetLine() int64{
+  return h.Line
+}
+
+
+// ife can be emulated with CondNode: it's just Cond with only one case
+type CondNode struct{
+  Line    int64
+  Cases   []PairNode
+  Default Symbol
+}
+
+func (c CondNode) GetLine() int64{
+  return c.Line
+}
+
+
+type CallNode struct{
+  Line   int64
+  Symbol int64
+  Pars   []Symbol
+}
+
+func (c CallNode) GetLine() int64{
+  return c.Line
+}
+
+
+type TyNode struct{
+	Line   int64
+	Symbol int64
+	Fields []PairNode
+}
+
+func (t TyNode) GetLine() int64{
+	return t.Line
+}
+
+
+type AssertNode struct{
+	Line int64
+	Def  Symbol
+}
+
+func (a AssertNode) GetLine() int64{
+	return a.Line
 }
