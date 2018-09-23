@@ -309,3 +309,44 @@ func (s SymbolTable) getType(id int64) (TypeNote, bool){
 		return TypeNote{TY_NIL, TY_NIL, TY_NIL}, false
 	}
 }
+
+
+
+
+type Scope struct{
+	Stack []*SymbolTable
+}
+
+func (s Scope) searchId(sym string) (int64, bool){
+	for i := len(s.Stack) - 1; i >= 0; i++ {
+		if val, ok := s.Stack[i].getId(sym); ok {
+			return val, ok
+		}
+	}
+	return -1, false
+}
+
+
+func (s Scope) searchSym(id int64) (string, bool){
+	for i := len(s.Stack) - 1; i >= 0; i++ {
+		if val, ok := s.Stack[i].getSym(id); ok {
+			return val, ok
+		}
+	}
+	return "", false
+}
+
+
+func (s Scope) searchType(id int64) (TypeNote, bool){
+	for i := len(s.Stack) - 1; i >= 0; i++ {
+		if val, ok := s.Stack[i].getType(id); ok {
+			return val, ok
+		}
+	}
+	return TypeNote{TY_NIL, TY_NIL, TY_NIL}, false
+}
+
+
+func (s Scope) addTable(syms *SymbolTable){
+	s.Stack = append(s.Stack, syms)
+}
