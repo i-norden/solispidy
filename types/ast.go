@@ -1,84 +1,44 @@
 package types
 
-
-
-
-
-
-
-
-
-
-type AST struct{
-  here *interface{}
-  next *interface{}
+type AST struct {
+	Here *interface{}
+	Next *interface{}
 }
 
-
-
-
-
-
-type FnId struct{
-  fnid int64
+type FnId struct {
+	Fnid int64
 }
 
-
-
-
-
-
-type TyId struct{
-  tyid int64
+type TyId struct {
+	Tyid int64
 }
 
-
-
-
-
-type AssertId struct{
-  assertid int64
+type AssertId struct {
+	Assertid int64
 }
 
-
-
-
-
-type CnstInt struct{
-  data [4]uint64
+type CnstInt struct {
+	Data [4]uint64
 }
 
-
-
-
-
-
-type CnstStr struct{
-  data string
+type CnstStr struct {
+	Data string
 }
 
-
-
-
-
-type CnstBool struct{
-  data bool
+type CnstBool struct {
+	Data bool
 }
 
-
-
-
-
-type Symbol struct{
-  symbol string
+type FnSymbol struct {
+	Symbol string
 }
 
+type TySymbol struct {
+	Symbol string
+}
 
-
-
-
-type SymbolTable struct{
-  fndefs     []AST
-  tydefs     []AST
-  assertdefs []AST
+type SymbolTable struct {
+	Fndefs     []AST
+	Tydefs     []AST
+	Assertdefs []AST
 }
