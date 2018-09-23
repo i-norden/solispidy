@@ -2,7 +2,9 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 	"github.com/i-norden/solispidy/types"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -58,6 +60,7 @@ func Tokenize(program string) (Lines, error) {
 }
 
 func ReadFromLines(lines Lines) ([]types.Symbol, error) {
+	fmt.Println("Hello, playground")
 	var tokens []types.Symbol
 
 	for _, line := range lines {
@@ -76,34 +79,63 @@ func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
 		return nil, errors.New("Unexpected EOF")
 	}
 
-	var result []types.Symbol
-	token := tokens[0]
-	copy(tokens, tokens[1:])
-	tokens = tokens[:len(tokens)-1]
+	result := make([]types.Symbol, len(tokens))
 
-	if token == "(" {
-		for tokens[0] != ")" {
-			n, err := ReadFromTokens(tokens, ln)
-			if err != nil {
-				return nil, err
-			}
-			result = append(result, n...)
+	// Need to put spaces in front and/or behind quotations so that you can find em
+	// try to make this work to sort out quotes/strings
+	/*
+		quo1 := find(tokens, `"`)
+		if quo1 != -1 {
+			quo2 := find(tokens[quo1+1:], `"`)
+			join := strings.Join(tokens[quo1+1:quo2], "")
+			new := append(tokens[quo1+1:], join)
+			tokens = append(new, tokens[:quo2]...)
 		}
-		copy(tokens, tokens[1:])
-		tokens = tokens[:len(tokens)-1]
+	*/
 
-		return result, nil
+	for i, token := range tokens {
+		result[i] = atom(token, ln)
 	}
-	if token == ")" {
-		return nil, errors.New("Unexpected )")
-	}
-
-	result = append(result, atom(token, ln))
 
 	return result, nil
 }
 
+func MakeAST(symbols []types.Symbol, ast types.AST, count int) (types.AST, error) {
+	symbol := symbols[0]
+	symbols = symbols[1:]
+
+	switch t := symbol.(type) {
+	case types.LeftPar:
+		fmt.Fprintf(os.Stderr, "type: %v", t)
+		count += 1
+		return MakeAST(symbols, ast, count)
+	case types.RightPar:
+		fmt.Fprintf(os.Stderr, "type: %v", t)
+		count -= 1
+		if count == 0 {
+			ast.Next = nil
+			return ast, nil
+		}
+		return MakeAST(symbols, ast, count)
+	default:
+		fmt.Fprintf(os.Stderr, "type: %v", t)
+		ast.Here = &symbol
+		next, err := MakeAST(symbols, types.AST{}, count)
+		if err != nil {
+			return types.AST{}, err
+		}
+		ast.Next = &next
+		return ast, nil
+	}
+}
+
 func atom(token string, ln int64) types.Symbol {
+	if token == "(" {
+		return types.LeftPar{LPId: 1, Line: ln}
+	}
+	if token == ")" {
+		return types.RightPar{RPId: 1, Line: ln}
+	}
 	if token == "False" || token == "false" {
 		return types.CnstBool{Data: false, Line: ln}
 	}
@@ -117,6 +149,15 @@ func atom(token string, ln int64) types.Symbol {
 	}
 	ui := uint64(i)
 	return types.CnstInt{Data: [4]uint64{ui}, Line: ln}
+}
+
+func find(a []string, x string) int {
+	for i, n := range a {
+		if x == n {
+			return i
+		}
+	}
+	return -1
 }
 
 func remove(slice []string, s int) []string {
