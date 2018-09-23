@@ -311,6 +311,15 @@ func (s SymbolTable) getType(id int64) (TypeNote, bool){
 }
 
 
+func (s SymbolTable) setType(id int64, t TypeNote) bool {
+	if _, ok := s.Types[id]; ok {
+		s.Types[id] = t
+		return true
+	}
+	return false
+}
+
+
 
 
 type Scope struct{
@@ -344,6 +353,16 @@ func (s Scope) searchType(id int64) (TypeNote, bool){
 		}
 	}
 	return TypeNote{TY_NIL, TY_NIL, TY_NIL}, false
+}
+
+
+func (s Scope) setType(id int64, t TypeNote) bool {
+	for i := len(s.Stack) - 1; i >= 0; i++ {
+		if ok := s.Stack[i].setType(id, t); ok {
+			return ok
+		}
+	}
+	return false
 }
 
 
