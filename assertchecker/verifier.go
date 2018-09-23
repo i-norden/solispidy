@@ -1,5 +1,5 @@
 package assertchecker
 
-import(
-  //"github.com/mitchellh/go-z3"
+import (
+//"github.com/mitchellh/go-z3"
 )

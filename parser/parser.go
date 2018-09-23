@@ -2,7 +2,9 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 	"github.com/i-norden/solispidy/types"
+	"os"
 	"strconv"
 	"strings"
 )
@@ -14,7 +16,7 @@ import (
 type Line struct {
 	Text   string
 	Tokens []string
-	Number int
+	Number int64
 }
 
 type Lines []*Line
@@ -38,7 +40,7 @@ func Tokenize(program string) (Lines, error) {
 
 		l := Line{
 			Text:   line,
-			Number: i,
+			Number: int64(i),
 		}
 
 		if (line != "") && (string(line[0]) != ";") {
@@ -57,29 +59,44 @@ func Tokenize(program string) (Lines, error) {
 	return linesOfInterest, nil
 }
 
-func ReadFromLines(lines Lines) ([]interface{}, error) {
+func ReadFromLines(lines Lines) ([]types.Symbol, error) {
+	var tokens []types.Symbol
+
 	for _, line := range lines {
-		return ReadFromTokens(line.Tokens)
+		//fmt.Fprintf(os.Stderr, "line: %v\r\n", line)
+		parsedTokens, err := ReadFromTokens(line.Tokens, line.Number)
+		//fmt.Fprintf(os.Stderr, "parsedTokens: %v\r\n", parsedTokens)
+		if err != nil {
+			return nil, err
+		}
+		tokens = append(tokens, parsedTokens...)
 	}
+
+	return tokens, nil
 }
 
-func ReadFromTokens(tokens []string) ([]interface{}, error) {
+func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
+	fmt.Fprintf(os.Stderr, "tokens: %v\r\n", tokens)
 	if len(tokens) == 0 {
 		return nil, errors.New("Unexpected EOF")
 	}
 
-	var result []interface{}
+	var result []types.Symbol
 	token := tokens[0]
 	copy(tokens, tokens[1:])
 	tokens = tokens[:len(tokens)-1]
 
+	fmt.Fprintf(os.Stderr, "tokens here: %v\r\n", tokens)
+
 	if token == "(" {
 		if tokens[0] != ")" {
-			n, err := ReadFromTokens(tokens)
+			n, err := ReadFromTokens(tokens, ln)
+			fmt.Fprintf(os.Stderr, "read: %v\r\n", n)
 			if err != nil {
 				return nil, err
 			}
 			result = append(result, n...)
+			fmt.Fprintf(os.Stderr, "result: %v\r\n", result)
 		}
 		copy(tokens, tokens[1:])
 		tokens = tokens[:len(tokens)-1]
@@ -90,25 +107,25 @@ func ReadFromTokens(tokens []string) ([]interface{}, error) {
 		return nil, errors.New("Unexpected )")
 	}
 
-	result = append(result, atom(token))
+	result = append(result, atom(token, ln))
 
 	return result, nil
 }
 
-func atom(token string) interface{} {
+func atom(token string, ln int64) types.Symbol {
 	if token == "False" || token == "false" {
-		return types.CnstBool{Data: false}
+		return types.CnstBool{Data: false, Line: ln}
 	}
 	if token == "True" || token == "true" {
-		return types.CnstBool{Data: true}
+		return types.CnstBool{Data: true, Line: ln}
 	}
 
 	i, err := strconv.ParseInt(token, 10, 64)
 	if err != nil {
-		return types.CnstStr{Data: token}
+		return types.CnstStr{Data: token, Line: ln}
 	}
 	ui := uint64(i)
-	return types.CnstInt{Data: [4]uint64{ui}}
+	return types.CnstInt{Data: [4]uint64{ui}, Line: ln}
 }
 
 func remove(slice []string, s int) []string {
