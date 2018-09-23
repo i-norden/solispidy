@@ -115,7 +115,7 @@ const (
 
 type FnNode struct{
   Line     int64
-  Symbol   int64
+  Symbol   string
   Inpars   []TypeNote
   Expars   []TypeNote
   IsPublic bool
@@ -160,7 +160,7 @@ func (p PairNode) GetLine() int64{
 
 type VarNode struct{
 	Line   int64
-  Symbol int64
+  Symbol string
   Type   TypeNote
   Def    *Symbol
 }
@@ -177,6 +177,7 @@ type ContractNode struct{
   Asserts []AssertNode
 	Fields  []FieldNode
 	SymTab  SymbolTable
+	Symbol  string
 }
 
 func (c ContractNode) GetLine() int64{
@@ -219,7 +220,7 @@ func (c CondNode) GetLine() int64{
 
 type CallNode struct{
   Line   int64
-  Symbol int64
+  Symbol string
   Pars   []Symbol
 }
 
@@ -230,7 +231,7 @@ func (c CallNode) GetLine() int64{
 
 type TyNode struct{
 	Line   int64
-	Symbol int64
+	Symbol string
 	Fields []PairNode
 }
 
@@ -253,7 +254,7 @@ type FieldNode struct{
 	Line   int64
 	TyIn   int64
 	TyEx   int64
-	Symbol int64
+	Symbol string
 }
 
 func (f FieldNode) GetLine() int64{
@@ -270,6 +271,12 @@ type SymbolTable struct {
 	Types     map[int64]TypeNote
 	Count     int64
 }
+
+
+func EmptyTable() SymbolTable{
+	return SymbolTable{ map[string]int64{}, map[int64]string{}, map[int64]TypeNote{}, 0}
+}
+
 
 func (s SymbolTable) addSym(sym string) int64{
 	if val, ok := s.SymsToIds[sym]; ok {
@@ -368,4 +375,14 @@ func (s Scope) setType(id int64, t TypeNote) bool {
 
 func (s Scope) addTable(syms *SymbolTable){
 	s.Stack = append(s.Stack, syms)
+}
+
+
+
+type DefTable struct{
+	FnDefs map[int64]FnNode
+	TyDefs map[int64]TyNode
+	Fields map[int64]([]FieldNode)
+	VrDefs map[int64]VarNode
+	AsDefs map[int64]AssertNode
 }

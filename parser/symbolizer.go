@@ -244,6 +244,7 @@ func checkContractDef(ast *types.AST) (*types.ContractNode, error){
 
     // Iterate over defs, typeswitch on defs and add them to contract arrays.
     // If anything defaults, return an error.
+    //cdrlist()
 
   }
   return nil, errors.New("Failed to parse contract definition")
@@ -266,4 +267,19 @@ func checkFnDef(ast *types.AST) (*types.FnNode, error){
 
   }
   return nil, errors.New("Failed to parse function definition")
+}
+
+
+func checkTyDef(ast *types.AST) (*types.TyNode, error){
+  if val, err := checkGenericNode(ast, "defty"); err != nil {
+    here := *val.Here
+    here_ := here.(types.Symbol)
+    ret := types.TyNode{(here_.GetLine()), "", []types.PairNode{}}
+    sym0, _ := pullFnSymbol(ast.Next)
+    ret.Symbol = sym0
+
+    // Check if fields are valid
+
+  }
+  return nil, errors.New("Failed to parse type definition")
 }
