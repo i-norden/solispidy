@@ -4,8 +4,8 @@ Parser:
   x Load files
   x Extract Tokens
   x Verify that parentheses match up
-  * Handle String, Uint, and Bool constants. Convert everything else into symbols.
-  * Convert tokens into AST
+  x Handle String, Uint, and Bool constants. Convert everything else into symbols.
+  x Convert tokens into AST
   * Generate a per-contract Symbol Table:
     * Local variables
     * Local structs
