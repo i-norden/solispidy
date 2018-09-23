@@ -16,8 +16,26 @@ type Symbol interface {
 	GetLine() int64
 }
 
+type LeftPar struct {
+    RPId int64
+    Line int64
+}
+
+func (f LeftPar) GetLine() int64 {
+  return f.Line
+}
+
+type RightPar struct {
+    LPId int64
+    Line int64
+}
+
+func (f RightPar) GetLine() int64 {
+  return f.Line
+}
+
 type FnId struct {
-	Fnid int64
+	FnId int64
 	Line int64
 }
 
@@ -26,7 +44,7 @@ func (f FnId) GetLine() int64 {
 }
 
 type TyId struct {
-	Tyid int64
+	TyId int64
 	Line int64
 }
 
@@ -35,7 +53,7 @@ func (f TyId) GetLine() int64 {
 }
 
 type AssertId struct {
-	Assertid int64
+	AssertId int64
 	Line     int64
 }
 

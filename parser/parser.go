@@ -2,9 +2,7 @@ package parser
 
 import (
 	"errors"
-	"fmt"
 	"github.com/i-norden/solispidy/types"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -63,9 +61,7 @@ func ReadFromLines(lines Lines) ([]types.Symbol, error) {
 	var tokens []types.Symbol
 
 	for _, line := range lines {
-		//fmt.Fprintf(os.Stderr, "line: %v\r\n", line)
 		parsedTokens, err := ReadFromTokens(line.Tokens, line.Number)
-		//fmt.Fprintf(os.Stderr, "parsedTokens: %v\r\n", parsedTokens)
 		if err != nil {
 			return nil, err
 		}
@@ -76,7 +72,6 @@ func ReadFromLines(lines Lines) ([]types.Symbol, error) {
 }
 
 func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
-	fmt.Fprintf(os.Stderr, "tokens: %v\r\n", tokens)
 	if len(tokens) == 0 {
 		return nil, errors.New("Unexpected EOF")
 	}
@@ -86,17 +81,13 @@ func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
 	copy(tokens, tokens[1:])
 	tokens = tokens[:len(tokens)-1]
 
-	fmt.Fprintf(os.Stderr, "tokens here: %v\r\n", tokens)
-
 	if token == "(" {
-		if tokens[0] != ")" {
+		for tokens[0] != ")" {
 			n, err := ReadFromTokens(tokens, ln)
-			fmt.Fprintf(os.Stderr, "read: %v\r\n", n)
 			if err != nil {
 				return nil, err
 			}
 			result = append(result, n...)
-			fmt.Fprintf(os.Stderr, "result: %v\r\n", result)
 		}
 		copy(tokens, tokens[1:])
 		tokens = tokens[:len(tokens)-1]
