@@ -1,0 +1,33 @@
+High Priority:
++
+-
+*
+/
+%
+>
+<
+>=
+=<
+=
+!=
+zero?
+one?
+nonzero?
+and
+not
+or
+xor
+len
+index
+get
+set
+map
+reduce
+filter
+ife
+loop
+hash
+cond
+
+Low Priority:
+mapreduce
