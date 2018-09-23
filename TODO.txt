@@ -15,8 +15,8 @@ Parser:
   * Translate symbols into variables, functions, and types through table lookups. If an undefined symbol is found, error.
 
 Type Checker:
-  * Define core type structs
-    * Uint, Str, Bool, Address, and Hash, plus Mapping, Array, Function, and Struct extensions for these.
+  x Define core type structs
+    x Uint, Str, Bool, Address, and Hash, plus Mapping, Array, Function, and Struct extensions for these.
   * Check that inputs and outputs match up in functions.
   * Associate each function/variable in each symbol tables with a type
   ^ The above two can probably be merged into a single task, more or less
