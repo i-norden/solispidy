@@ -1,13 +1,10 @@
 package parser_test
 
 import (
-	"fmt"
-	. "github.com/onsi/ginkgo"
-	. "github.com/onsi/gomega"
-	"os"
-
 	"github.com/i-norden/solispidy/parser"
 	"github.com/i-norden/solispidy/types"
+	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/gomega"
 )
 
 var _ = Describe("Parser", func() {
@@ -95,7 +92,8 @@ var _ = Describe("Parser", func() {
 
 		ast, err := parser.MakeAST(tokens, types.AST{}, 0)
 		Expect(err).ToNot(HaveOccurred())
-		Expect(ast).To(Equal(AST1))
-		fmt.Fprintf(os.Stderr, "AST here: %v\r\n AST next here: %v\r\n", *ast.Here, *ast.Next.Here)
+		Expect(ast).To(Equal(&AST1))
+		str := parser.PrettyPrint(ast)
+		println(str)
 	})
 })

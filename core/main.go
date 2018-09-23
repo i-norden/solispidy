@@ -1,9 +1,14 @@
 package main
 
-import "io/ioutil"
-import "os"
-import "fmt"
-import "../parser"
+import (
+	"fmt"
+	"io/ioutil"
+	"log"
+	"os"
+
+	"github.com/i-norden/solispidy/parser"
+	"github.com/i-norden/solispidy/types"
+)
 
 func loadSourceFiles(files []string) ([]string, error) {
 	var filetexts []string
@@ -28,24 +33,31 @@ func main() {
 
 	fmt.Println(files)
 
-	texts, errs := loadSourceFiles(files)
+	texts, err := loadSourceFiles(files)
 
-	if errs != nil {
-		fmt.Println(errs)
+	if err != nil {
+		log.Fatal(err)
 		return
 	} else {
 		fmt.Println("Files loaded successfully.")
 	}
 
 	for _, text := range texts {
-		lines, errs := parser.Tokenize(text)
-		if errs != nil {
-			fmt.Println(errs)
+		lines, err := parser.Tokenize(text)
+		if err != nil {
+			log.Fatal(err)
 			return
 		} else {
-			for _, line := range lines {
-				fmt.Println(line)
+			tokens, err := parser.ReadFromLines(lines)
+			if err != nil {
+				log.Fatal(err)
 			}
+			ast, err := parser.MakeAST(tokens, types.AST{}, 0)
+			if err != nil {
+				log.Fatal(err)
+			}
+			str := parser.PrettyPrint(ast)
+			println(str)
 		}
 	}
 

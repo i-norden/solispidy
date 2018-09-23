@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/i-norden/solispidy/types"
@@ -60,7 +61,6 @@ func Tokenize(program string) (Lines, error) {
 }
 
 func ReadFromLines(lines Lines) ([]types.Symbol, error) {
-	fmt.Println("Hello, playground")
 	var tokens []types.Symbol
 
 	for _, line := range lines {
@@ -100,32 +100,32 @@ func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
 	return result, nil
 }
 
-func MakeAST(symbols []types.Symbol, ast types.AST, count int) (types.AST, error) {
+func MakeAST(symbols []types.Symbol, ast types.AST, count int) (*types.AST, error) {
 	symbol := symbols[0]
 	symbols = symbols[1:]
 
 	switch t := symbol.(type) {
 	case types.LeftPar:
-		fmt.Fprintf(os.Stderr, "type: %v", t)
 		count += 1
 		return MakeAST(symbols, ast, count)
 	case types.RightPar:
-		fmt.Fprintf(os.Stderr, "type: %v", t)
 		count -= 1
 		if count == 0 {
 			ast.Next = nil
-			return ast, nil
+			return &ast, nil
 		}
 		return MakeAST(symbols, ast, count)
+	case types.AssertNode:
+		fmt.Fprintf(os.Stderr, "Type: %v\r\n", t)
+		return nil, nil
 	default:
-		fmt.Fprintf(os.Stderr, "type: %v", t)
 		ast.Here = &symbol
 		next, err := MakeAST(symbols, types.AST{}, count)
 		if err != nil {
-			return types.AST{}, err
+			return nil, err
 		}
-		ast.Next = &next
-		return ast, nil
+		ast.Next = next
+		return &ast, nil
 	}
 }
 
@@ -151,6 +151,10 @@ func atom(token string, ln int64) types.Symbol {
 	return types.CnstInt{Data: [4]uint64{ui}, Line: ln}
 }
 
+func PrettyPrint(i interface{}) string {
+	s, _ := json.MarshalIndent(i, "", "\t")
+	return string(s)
+}
 func find(a []string, x string) int {
 	for i, n := range a {
 		if x == n {
