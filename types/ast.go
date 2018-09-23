@@ -5,12 +5,6 @@ type AST struct {
 	Next *AST
 }
 
-type SymbolTable struct {
-	Fndefs     []AST
-	Tydefs     []AST
-	Assertdefs []AST
-}
-
 // Symbol definitions
 type Symbol interface {
 	GetLine() int64
@@ -126,6 +120,7 @@ type FnNode struct{
   Expars   []TypeNote
   IsPublic bool
   Def      *Symbol
+	SymTab   SymbolTable
 }
 
 func (f FnNode) GetLine() int64 {
@@ -136,6 +131,7 @@ type LetNode struct{
   Line   int64
   Vars   []VarNode
   Def    *Symbol
+	SymTab SymbolTable
 }
 
 func (l LetNode) GetLine() int64 {
@@ -179,6 +175,8 @@ type ContractNode struct{
   Types   []TyNode
   Vars    []VarNode
   Asserts []AssertNode
+	Fields  []FieldNode
+	SymTab  SymbolTable
 }
 
 func (c ContractNode) GetLine() int64{
@@ -248,4 +246,66 @@ type AssertNode struct{
 
 func (a AssertNode) GetLine() int64{
 	return a.Line
+}
+
+
+type FieldNode struct{
+	Line   int64
+	TyIn   int64
+	TyEx   int64
+	Symbol int64
+}
+
+func (f FieldNode) GetLine() int64{
+	return f.Line
+}
+
+
+
+
+
+type SymbolTable struct {
+	SymsToIds map[string]int64
+	IdsToSyms map[int64]string
+	Types     map[int64]TypeNote
+	Count     int64
+}
+
+func (s SymbolTable) addSym(sym string) int64{
+	if val, ok := s.SymsToIds[sym]; ok {
+		return val
+	}else{
+		s.Count++
+		s.SymsToIds[sym] = s.Count
+		s.IdsToSyms[s.Count] = sym
+		s.Types[s.Count] = TypeNote{TY_NIL, TY_NIL, TY_NIL}
+		return s.Count;
+	}
+}
+
+
+func (s SymbolTable) getSym(id int64) (string, bool){
+	if val, ok := s.IdsToSyms[id]; ok {
+		return val, ok
+	}else{
+		return "", false
+	}
+}
+
+
+func (s SymbolTable) getId(sym string) (int64, bool){
+	if val, ok := s.SymsToIds[sym]; ok {
+		return val, ok
+	}else{
+		return -1, false
+	}
+}
+
+
+func (s SymbolTable) getType(id int64) (TypeNote, bool){
+	if val, ok := s.Types[id]; ok {
+		return val, ok
+	}else{
+		return TypeNote{TY_NIL, TY_NIL, TY_NIL}, false
+	}
 }
