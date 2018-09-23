@@ -11,14 +11,14 @@ var _ = Describe("Parser", func() {
 
 	mockProgram := "This is a test\n; reject this\n(split    me up 3)"
 	line1 := parser.Line{
-		Text: "This is a test",
+		Text:   "This is a test",
 		Number: 0,
-		Tokens: []string{"This","is","a","test"},
+		Tokens: []string{"This", "is", "a", "test"},
 	}
 	line2 := parser.Line{
-		Text: "(split    me up 3)",
+		Text:   "(split    me up 3)",
 		Number: 2,
-		Tokens: []string{"(","split","me","up","3",")"},
+		Tokens: []string{"(", "split", "me", "up", "3", ")"},
 	}
 
 	It("Tests the Tokenize function", func() {

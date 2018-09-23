@@ -1,13 +1,15 @@
 package parser
 
 import (
-	"strings"
 	"errors"
+	"github.com/i-norden/solispidy/types"
+	"strconv"
+	"strings"
 )
 
 // recognize unclosed paranthesis
 // recognize strings
-
+// identify any capitalized word as type
 
 type Line struct {
 	Text   string
@@ -35,7 +37,7 @@ func Tokenize(program string) (Lines, error) {
 	for i, line := range lines {
 
 		l := Line{
-			Text: line,
+			Text:   line,
 			Number: i,
 		}
 
@@ -55,11 +57,65 @@ func Tokenize(program string) (Lines, error) {
 	return linesOfInterest, nil
 }
 
+func ReadFromLines(lines Lines) ([]interface{}, error) {
+	for _, line := range lines {
+		return ReadFromTokens(line.Tokens)
+	}
+}
+
+func ReadFromTokens(tokens []string) ([]interface{}, error) {
+	if len(tokens) == 0 {
+		return nil, errors.New("Unexpected EOF")
+	}
+
+	var result []interface{}
+	token := tokens[0]
+	copy(tokens, tokens[1:])
+	tokens = tokens[:len(tokens)-1]
+
+	if token == "(" {
+		if tokens[0] != ")" {
+			n, err := ReadFromTokens(tokens)
+			if err != nil {
+				return nil, err
+			}
+			result = append(result, n...)
+		}
+		copy(tokens, tokens[1:])
+		tokens = tokens[:len(tokens)-1]
+
+		return result, nil
+	}
+	if token == ")" {
+		return nil, errors.New("Unexpected )")
+	}
+
+	result = append(result, atom(token))
+
+	return result, nil
+}
+
+func atom(token string) interface{} {
+	if token == "False" || token == "false" {
+		return types.CnstBool{Data: false}
+	}
+	if token == "True" || token == "true" {
+		return types.CnstBool{Data: true}
+	}
+
+	i, err := strconv.ParseInt(token, 10, 64)
+	if err != nil {
+		return types.CnstStr{Data: token}
+	}
+	ui := uint64(i)
+	return types.CnstInt{Data: [4]uint64{ui}}
+}
+
 func remove(slice []string, s int) []string {
 	return append(slice[:s], slice[s+1:]...)
 }
 
-func delete_empty (s []string) []string {
+func delete_empty(s []string) []string {
 	var r []string
 	for _, str := range s {
 		if str != "" {
