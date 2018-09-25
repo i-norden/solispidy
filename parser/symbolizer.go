@@ -57,6 +57,7 @@ func cdrlist(ast *types.AST) []*types.AST {
 	return ret
 }
 
+
 func cdarlist(ast *types.AST) []*types.Symbol {
 	i := ast.Next
 	var ret []*types.Symbol
@@ -67,6 +68,7 @@ func cdarlist(ast *types.AST) []*types.Symbol {
 	return ret
 }
 
+
 func nodelist(ast *types.AST) []*types.AST {
 	i := ast
 	var ret []*types.AST
@@ -76,6 +78,7 @@ func nodelist(ast *types.AST) []*types.AST {
 	}
 	return ret
 }
+
 
 func carlist(ast *types.AST) []*types.Symbol {
 	i := ast
@@ -102,6 +105,7 @@ func checkGenericNode(ast *types.AST, fnsym string) (*types.AST, error) {
 	return nil, errors.New("Failed to match pattern")
 }
 
+
 func pullFnSymbol(ast *types.AST) (string, bool) {
 	here := *ast.Next.Here
 	if val, ok := here.(types.FnSymbol); ok {
@@ -111,7 +115,8 @@ func pullFnSymbol(ast *types.AST) (string, bool) {
 	}
 }
 
-func checkContractDef(ast *types.AST) (*types.ContractNode, error) {
+
+func CheckContractDef(ast *types.AST) (*types.ContractNode, error) {
 	if val, err := checkGenericNode(ast, "def-contract"); err != nil {
 		here := *val.Here
 		here_ := here.(types.Symbol)
@@ -121,13 +126,21 @@ func checkContractDef(ast *types.AST) (*types.ContractNode, error) {
 
 		// Iterate over defs, typeswitch on defs and add them to contract arrays.
 		// If anything defaults, return an error.
-		//cdrlist()
+		defs := cdrlist(ast)
+		for _, def := range defs {
+			if node, er := checkFnDef(def); er != nil {
+				
+			}else if node, er := checkTyDef(def); er != nil {
+
+			}
+		}
 
 		// If everything is okay
 		return &ret, nil
 	}
 	return nil, errors.New("Failed to parse contract definition")
 }
+
 
 func checkFnDef(ast *types.AST) (*types.FnNode, error) {
 	if val, err := checkGenericNode(ast, "defn"); err != nil {
@@ -148,6 +161,7 @@ func checkFnDef(ast *types.AST) (*types.FnNode, error) {
 	}
 	return nil, errors.New("Failed to parse function definition")
 }
+
 
 func checkTyDef(ast *types.AST) (*types.TyNode, error) {
 	if val, err := checkGenericNode(ast, "defty"); err != nil {
