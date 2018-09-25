@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	//"../types"
 	"github.com/i-norden/solispidy/types"
 )
 
@@ -47,153 +48,6 @@ func carlist(ast *types.AST) []*types.Symbol {
 	return ret
 }
 
-/*
-func checkContractDef(ast *types.AST) (error){
-  header  := *ast.Here
-  val, ok := header.(types.FnSymbol)
-  if !ok || (val.Symbol != "def-contract") {
-    return errors.New("Expected (def-contract ...)")
-  }else{
-    return nil
-  }
-
-  defs := cdarlist(ast)
-  for _, v := range defs {
-    derefv := *v
-    val, ok := derefv.(types.AST)
-    if ok {
-      var check [5]error
-      check[0] = checkFnDef(&val)
-      check[1] = checkTyDef(&val)
-      check[2] = checkPubvarDef(&val)
-      check[3] = checkPrifunDef(&val)
-      check[4] = checkAssert(&val)
-
-      for i:=0; i<5; i++ {
-        if check[i] != nil {
-          return nil
-        }
-      }
-      return errors.New("Contract features invalid definition")
-
-    }else{
-      return errors.New("Expected a definition")
-    }
-  }
-  return nil
-}
-
-
-func checkFnDef(ast *types.AST) (error){
-  header  := *ast.Here
-  val, ok := header.(types.FnSymbol)
-  if !ok || (val.Symbol != "defn") {
-    return errors.New("Expected (defn ...)")
-  }else{
-    return nil
-  }
-
-  //_ := cdarlist(ast)
-  return nil
-}
-
-
-func checkTyDef(ast *types.AST) (error){
-  header  := *ast.Here
-  val, ok := header.(types.FnSymbol)
-  if !ok || (val.Symbol != "defty") {
-    return errors.New("Expected (defty ...)")
-  }else{
-    return nil
-  }
-
-  //_ := cdarlist(ast)
-  return nil
-}
-
-
-func checkPubvarDef(ast *types.AST) (error){
-  header  := *ast.Here
-  val, ok := header.(types.FnSymbol)
-  if !ok || (val.Symbol != "def-pubvar") {
-    return errors.New("Expected (def-pubvar ...)")
-  }else{
-    return nil
-  }
-
-  //_ := cdarlist(ast)
-  return nil
-}
-
-
-func checkPrifunDef(ast *types.AST) (error){
-  header  := *ast.Here
-  val, ok := header.(types.FnSymbol)
-  if !ok || (val.Symbol != "def-prifun") {
-    return errors.New("Expected (def-prifun ...)")
-  }else{
-    return nil
-  }
-
-  //_ := cdarlist(ast)
-  return nil
-}
-
-
-func checkAssert(ast *types.AST) (error){
-  header  := *ast.Here
-  val, ok := header.(types.FnSymbol)
-  if !ok || (val.Symbol != "assert-state") {
-    return errors.New("Expected (assert-state ...)")
-  }else{
-    return nil
-  }
-
-  //defs := cdarlist(ast)
-  return nil
-}
-
-
-func checkPar(ast *types.AST) (error){
-  if ast.Next == nil {
-    return errors.New(fmt.Sprintf("L:%d : Expected a second value in parameter list."))
-  }
-  head := *ast.Here
-  tail := *ast.Next.Here
-
-  if _, ok := head.(types.FnSymbol); ok {
-    if _, ok := tail.(types.TySymbol); ok {
-      return nil
-    }
-  }
-  return errors.New(fmt.Sprintf("L:%d : Improperly formatted parameter."))
-}
-
-
-func checkVar(ast *types.AST) (error){
-  if ast.Next == nil {
-    return errors.New(fmt.Sprintf("L:%d : Expected a 3 values in variable definition."))
-  }
-  if ast.Next.Next == nil{
-    return errors.New(fmt.Sprintf("L:%d : Expected a 3 values in variable definition."))
-  }
-  head := *ast.Here
-  ty   := *ast.Next.Here
-  tail := *ast.Next.Next.Here
-
-  if _, ok := head.(types.FnSymbol); ok {
-    if _, ok := ty.(types.TySymbol); ok {
-      // Add a checkExpr here later
-      return nil
-    }
-  }
-  return errors.New(fmt.Sprintf("L:%d : Improperly formatted parameter."))
-}
-
-/*
-func checkExpr(ast *types.AST) (error){
-
-}*/
 
 func checkGenericNode(ast *types.AST, fnsym string) (*types.AST, error) {
 	if ast.Here == nil {
@@ -230,6 +84,8 @@ func checkContractDef(ast *types.AST) (*types.ContractNode, error) {
 		// If anything defaults, return an error.
 		//cdrlist()
 
+		// If everything is okay
+		return &ret, nil
 	}
 	return nil, errors.New("Failed to parse contract definition")
 }
@@ -248,6 +104,8 @@ func checkFnDef(ast *types.AST) (*types.FnNode, error) {
 
 		// Insert parnames into Symbol Table
 
+		// If everything is okay
+		return &ret, nil
 	}
 	return nil, errors.New("Failed to parse function definition")
 }
@@ -262,6 +120,9 @@ func checkTyDef(ast *types.AST) (*types.TyNode, error) {
 
 		// Check if fields are valid
 
+
+		// If everything is okay
+		return &ret, nil
 	}
 	return nil, errors.New("Failed to parse type definition")
 }
