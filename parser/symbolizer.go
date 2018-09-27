@@ -129,10 +129,13 @@ func CheckContractDef(ast *types.AST) (*types.ContractNode, error) {
 		defs := cdrlist(ast)
 		for _, def := range defs {
 			if node, er := checkFnDef(def); er != nil {
-				
+				ret.Funcs = append(ret.Funcs, *node)
 			}else if node, er := checkTyDef(def); er != nil {
-
+				ret.Types = append(ret.Types, *node)
+			}else{
+				return nil, errors.New("Unexpected expression in contract.")
 			}
+			// Add more cases for asserts and vars.
 		}
 
 		// If everything is okay
