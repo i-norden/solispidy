@@ -255,7 +255,7 @@ func (a AssertNode) GetLine() int64 {
 type FieldNode struct {
 	Line   int64
 	TyIn   string
-	TyEx   int64
+	TyEx   TyVal
 	Symbol string
 }
 

@@ -182,3 +182,29 @@ func checkTyDef(ast *types.AST) (*types.TyNode, error) {
 	}
 	return nil, errors.New("Failed to parse type definition")
 }
+
+
+func checkField(ast *types.AST, tyid string) (*types.FieldNode, error){
+	if ast.Next == nil {
+		return nil, errors.New("Expected a field definition with two elements, not one.")
+	}
+
+	// This needs to be more complex to handle compound types (mapping, array, etc.).
+	here := *ast.Next.Here
+	if _, ok := here.(types.TySymbol); ok {
+		var ret types.FieldNode
+		ret.TyIn = tyid
+		ret.TyEx = types.TY_NIL		// For now
+		if fun, ok := here.(types.FnSymbol); ok {
+			ret.Symbol = fun.Symbol
+		}else{
+			return nil, errors.New("Expected a field definition with a valid field name.")
+		}
+		if ast.Next.Next != nil {
+			return nil, errors.New("Expected a field definition with two elements, not three.")
+		}
+		return &ret, nil
+	}
+
+	return nil, errors.New("Expected a field definition with a valid type.")
+}
