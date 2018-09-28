@@ -268,6 +268,13 @@ type SymbolTable struct {
 	Count     int64
 }
 
+func EmptyTable() (SymbolTable){
+	var ret SymbolTable
+	ret.Types = map[string]TypeNote{}
+	ret.Count = 0
+	return ret
+}
+
 
 type Scope struct {
 	Stack []*SymbolTable

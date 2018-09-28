@@ -1,6 +1,6 @@
 package types
 
-type TyVal int
+type TyVal int64
 
 const (
 	TY_NIL  TyVal = iota // This is an empty type, as a default for values with as-of-yet-undetermined types
