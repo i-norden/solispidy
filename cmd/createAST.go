@@ -21,6 +21,7 @@ import (
 
 	"github.com/i-norden/solispidy/parser"
 	"github.com/i-norden/solispidy/types"
+	"github.com/i-norden/solispidy/common/utils"
 )
 
 // createASTCmd represents the createAST command
@@ -62,7 +63,7 @@ func createAST() {
 			if err != nil {
 				log.Fatal(err)
 			}
-			str := parser.PrettyPrint(ast)
+			str := utils.PrettyPrint(ast)
 			println(str)
 		}
 	}
