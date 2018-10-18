@@ -44,7 +44,6 @@ import (
 	the same goes for many other things.
 */
 
-
 // cdr is an old lisp function that returns the "next" value in a list
 // cdrlist returns an array of the next val, next of that, etc.
 func cdrlist(ast *types.AST) []*types.AST {
@@ -57,7 +56,6 @@ func cdrlist(ast *types.AST) []*types.AST {
 	return ret
 }
 
-
 func cdarlist(ast *types.AST) []*types.Symbol {
 	i := ast.Next
 	var ret []*types.Symbol
@@ -67,7 +65,6 @@ func cdarlist(ast *types.AST) []*types.Symbol {
 	}
 	return ret
 }
-
 
 func nodelist(ast *types.AST) []*types.AST {
 	i := ast
@@ -79,7 +76,6 @@ func nodelist(ast *types.AST) []*types.AST {
 	return ret
 }
 
-
 func carlist(ast *types.AST) []*types.Symbol {
 	i := ast
 	var ret []*types.Symbol
@@ -89,7 +85,6 @@ func carlist(ast *types.AST) []*types.Symbol {
 	}
 	return ret
 }
-
 
 func checkGenericNode(ast *types.AST, fnsym string) (*types.AST, error) {
 	if ast.Here == nil {
@@ -105,7 +100,6 @@ func checkGenericNode(ast *types.AST, fnsym string) (*types.AST, error) {
 	return nil, errors.New("Failed to match pattern")
 }
 
-
 func pullFnSymbol(ast *types.AST) (string, bool) {
 	here := *ast.Next.Here
 	if val, ok := here.(types.FnSymbol); ok {
@@ -114,7 +108,6 @@ func pullFnSymbol(ast *types.AST) (string, bool) {
 		return "", false
 	}
 }
-
 
 func CheckContractDef(ast *types.AST) (*types.ContractNode, error) {
 	if val, err := checkGenericNode(ast, "def-contract"); err != nil {
@@ -130,9 +123,9 @@ func CheckContractDef(ast *types.AST) (*types.ContractNode, error) {
 		for _, def := range defs {
 			if node, er := checkFnDef(def); er != nil {
 				ret.Funcs = append(ret.Funcs, *node)
-			}else if node, er := checkTyDef(def); er != nil {
+			} else if node, er := checkTyDef(def); er != nil {
 				ret.Types = append(ret.Types, *node)
-			}else{
+			} else {
 				return nil, errors.New("Unexpected expression in contract.")
 			}
 			// Add more cases for asserts and vars.
@@ -143,7 +136,6 @@ func CheckContractDef(ast *types.AST) (*types.ContractNode, error) {
 	}
 	return nil, errors.New("Failed to parse contract definition")
 }
-
 
 func checkFnDef(ast *types.AST) (*types.FnNode, error) {
 	if val, err := checkGenericNode(ast, "defn"); err != nil {
@@ -165,7 +157,6 @@ func checkFnDef(ast *types.AST) (*types.FnNode, error) {
 	return nil, errors.New("Failed to parse function definition")
 }
 
-
 func checkTyDef(ast *types.AST) (*types.TyNode, error) {
 	if val, err := checkGenericNode(ast, "defty"); err != nil {
 		here := *val.Here
@@ -176,15 +167,13 @@ func checkTyDef(ast *types.AST) (*types.TyNode, error) {
 
 		// Check if fields are valid
 
-
 		// If everything is okay
 		return &ret, nil
 	}
 	return nil, errors.New("Failed to parse type definition")
 }
 
-
-func checkField(ast *types.AST, tyid string) (*types.FieldNode, error){
+func checkField(ast *types.AST, tyid string) (*types.FieldNode, error) {
 	if ast.Next == nil {
 		return nil, errors.New("Expected a field definition with two elements, not one.")
 	}
@@ -194,10 +183,10 @@ func checkField(ast *types.AST, tyid string) (*types.FieldNode, error){
 	if _, ok := here.(types.TySymbol); ok {
 		var ret types.FieldNode
 		ret.TyIn = tyid
-		ret.TyEx = types.TY_NIL		// For now
+		ret.TyEx = types.TY_NIL // For now
 		if fun, ok := here.(types.FnSymbol); ok {
 			ret.Symbol = fun.Symbol
-		}else{
+		} else {
 			return nil, errors.New("Expected a field definition with a valid field name.")
 		}
 		if ast.Next.Next != nil {

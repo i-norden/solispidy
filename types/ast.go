@@ -104,21 +104,21 @@ type Operation int64
 
 const (
 	OP_ADD Operation = iota
-	OP_SUB Operation = iota
-	OP_MUL Operation = iota
-	OP_DIV Operation = iota
-	OP_MOD Operation = iota
-	OP_AND Operation = iota
-	OP_OR  Operation = iota
-	OP_XOR Operation = iota
-	OP_NOT Operation = iota
-	OP_LSS Operation = iota
-	OP_GTR Operation = iota
-	OP_EQ  Operation = iota
-	OP_NEQ Operation = iota
-	OP_NZR Operation = iota
-	OP_ONE Operation = iota
-	OP_ZR  Operation = iota
+	OP_SUB
+	OP_MUL
+	OP_DIV
+	OP_MOD
+	OP_AND
+	OP_OR
+	OP_XOR
+	OP_NOT
+	OP_LSS
+	OP_GTR
+	OP_EQ
+	OP_NEQ
+	OP_NZR
+	OP_ONE
+	OP_ZR
 )
 
 type FnNode struct {
@@ -264,17 +264,16 @@ func (f FieldNode) GetLine() int64 {
 }
 
 type SymbolTable struct {
-	Types     map[string]TypeNote
-	Count     int64
+	Types map[string]TypeNote
+	Count int64
 }
 
-func EmptyTable() (SymbolTable){
+func EmptyTable() SymbolTable {
 	var ret SymbolTable
 	ret.Types = map[string]TypeNote{}
 	ret.Count = 0
 	return ret
 }
-
 
 type Scope struct {
 	Stack []*SymbolTable
