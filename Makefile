@@ -1,2 +1,2 @@
 build:
-	go build -o bin/solispidy core/*.go
+	go build -o bin/solispidy
