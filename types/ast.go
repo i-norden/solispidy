@@ -104,21 +104,21 @@ type Operation int64
 
 const (
 	OP_ADD Operation = iota
-	OP_SUB Operation = iota
-	OP_MUL Operation = iota
-	OP_DIV Operation = iota
-	OP_MOD Operation = iota
-	OP_AND Operation = iota
-	OP_OR  Operation = iota
-	OP_XOR Operation = iota
-	OP_NOT Operation = iota
-	OP_LSS Operation = iota
-	OP_GTR Operation = iota
-	OP_EQ  Operation = iota
-	OP_NEQ Operation = iota
-	OP_NZR Operation = iota
-	OP_ONE Operation = iota
-	OP_ZR  Operation = iota
+	OP_SUB
+	OP_MUL
+	OP_DIV
+	OP_MOD
+	OP_AND
+	OP_OR
+	OP_XOR
+	OP_NOT
+	OP_LSS
+	OP_GTR
+	OP_EQ
+	OP_NEQ
+	OP_NZR
+	OP_ONE
+	OP_ZR
 )
 
 type FnNode struct {
@@ -254,8 +254,8 @@ func (a AssertNode) GetLine() int64 {
 
 type FieldNode struct {
 	Line   int64
-	TyIn   int64
-	TyEx   int64
+	TyIn   string
+	TyEx   TyVal
 	Symbol string
 }
 
@@ -264,102 +264,19 @@ func (f FieldNode) GetLine() int64 {
 }
 
 type SymbolTable struct {
-	SymsToIds map[string]int64
-	IdsToSyms map[int64]string
-	Types     map[int64]TypeNote
-	Count     int64
+	Types map[string]TypeNote
+	Count int64
 }
 
 func EmptyTable() SymbolTable {
-	return SymbolTable{map[string]int64{}, map[int64]string{}, map[int64]TypeNote{}, 0}
-}
-
-func (s SymbolTable) addSym(sym string) int64 {
-	if val, ok := s.SymsToIds[sym]; ok {
-		return val
-	} else {
-		s.Count++
-		s.SymsToIds[sym] = s.Count
-		s.IdsToSyms[s.Count] = sym
-		s.Types[s.Count] = TypeNote{TY_NIL, TY_NIL, TY_NIL}
-		return s.Count
-	}
-}
-
-func (s SymbolTable) getSym(id int64) (string, bool) {
-	if val, ok := s.IdsToSyms[id]; ok {
-		return val, ok
-	} else {
-		return "", false
-	}
-}
-
-func (s SymbolTable) getId(sym string) (int64, bool) {
-	if val, ok := s.SymsToIds[sym]; ok {
-		return val, ok
-	} else {
-		return -1, false
-	}
-}
-
-func (s SymbolTable) getType(id int64) (TypeNote, bool) {
-	if val, ok := s.Types[id]; ok {
-		return val, ok
-	} else {
-		return TypeNote{TY_NIL, TY_NIL, TY_NIL}, false
-	}
-}
-
-func (s SymbolTable) setType(id int64, t TypeNote) bool {
-	if _, ok := s.Types[id]; ok {
-		s.Types[id] = t
-		return true
-	}
-	return false
+	var ret SymbolTable
+	ret.Types = map[string]TypeNote{}
+	ret.Count = 0
+	return ret
 }
 
 type Scope struct {
 	Stack []*SymbolTable
-}
-
-func (s Scope) searchId(sym string) (int64, bool) {
-	for i := len(s.Stack) - 1; i >= 0; i++ {
-		if val, ok := s.Stack[i].getId(sym); ok {
-			return val, ok
-		}
-	}
-	return -1, false
-}
-
-func (s Scope) searchSym(id int64) (string, bool) {
-	for i := len(s.Stack) - 1; i >= 0; i++ {
-		if val, ok := s.Stack[i].getSym(id); ok {
-			return val, ok
-		}
-	}
-	return "", false
-}
-
-func (s Scope) searchType(id int64) (TypeNote, bool) {
-	for i := len(s.Stack) - 1; i >= 0; i++ {
-		if val, ok := s.Stack[i].getType(id); ok {
-			return val, ok
-		}
-	}
-	return TypeNote{TY_NIL, TY_NIL, TY_NIL}, false
-}
-
-func (s Scope) setType(id int64, t TypeNote) bool {
-	for i := len(s.Stack) - 1; i >= 0; i++ {
-		if ok := s.Stack[i].setType(id, t); ok {
-			return ok
-		}
-	}
-	return false
-}
-
-func (s Scope) addTable(syms *SymbolTable) {
-	s.Stack = append(s.Stack, syms)
 }
 
 type DefTable struct {

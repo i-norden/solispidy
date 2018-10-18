@@ -1,13 +1,14 @@
 package parser
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/i-norden/solispidy/types"
 	"os"
 	"strconv"
 	"strings"
+
+	"github.com/i-norden/solispidy/common/utils"
+	"github.com/i-norden/solispidy/types"
 )
 
 // recognize unclosed paranthesis
@@ -22,39 +23,16 @@ type Line struct {
 
 type Lines []*Line
 
-func Tokenize(program string) (Lines, error) {
+func Tokenize(program string) (linesOfInterest Lines, err error) {
 
-	leftPars := strings.Count(program, "(")
-	rightPars := strings.Count(program, ")")
-	if rightPars > leftPars {
-		return nil, errors.New("Missing opening parenthesis")
-	}
-	if leftPars > rightPars {
-		return nil, errors.New("Missing closing parenthesis")
-	}
-
-	var linesOfInterest Lines
-
-	lines := strings.Split(program, "\n")
-
-	for i, line := range lines {
-
-		l := Line{
-			Text:   line,
-			Number: int64(i),
-		}
-
-		if (line != "") && (string(line[0]) != ";") {
-			linesOfInterest = append(linesOfInterest, &l)
-		}
-	}
+	linesOfInterest, err = sanitize(program)
 
 	for _, line := range linesOfInterest {
 		var tempStr string
 		tempStr = strings.Replace(line.Text, "(", "( ", -1)
 		tempStr = strings.Replace(tempStr, ")", " )", -1)
 		line.Tokens = strings.Split(tempStr, " ")
-		line.Tokens = delete_empty(line.Tokens)
+		line.Tokens = utils.DeleteEmpty(line.Tokens)
 	}
 
 	return linesOfInterest, nil
@@ -129,6 +107,34 @@ func MakeAST(symbols []types.Symbol, ast types.AST, count int) (*types.AST, erro
 	}
 }
 
+func sanitize(program string) (linesOfInterest Lines, err error) {
+
+	leftPars := strings.Count(program, "(")
+	rightPars := strings.Count(program, ")")
+	if rightPars > leftPars {
+		return nil, errors.New("Missing opening parenthesis")
+	}
+	if leftPars > rightPars {
+		return nil, errors.New("Missing closing parenthesis")
+	}
+
+	lines := strings.Split(program, "\n")
+
+	for i, line := range lines {
+
+		l := Line{
+			Text:   line,
+			Number: int64(i),
+		}
+
+		if (line != "") && (string(line[0]) != ";") {
+			linesOfInterest = append(linesOfInterest, &l)
+		}
+	}
+
+	return
+}
+
 func atom(token string, ln int64) types.Symbol {
 	if token == "(" {
 		return types.LeftPar{LPId: 1, Line: ln}
@@ -149,35 +155,4 @@ func atom(token string, ln int64) types.Symbol {
 	}
 	ui := uint64(i)
 	return types.CnstInt{Data: [4]uint64{ui}, Line: ln}
-}
-
-func PrettyPrint(i interface{}) string {
-	s, _ := json.MarshalIndent(i, "", "\t")
-	return string(s)
-}
-func find(a []string, x string) int {
-	for i, n := range a {
-		if x == n {
-			return i
-		}
-	}
-	return -1
-}
-
-func remove(slice []string, s int) []string {
-	return append(slice[:s], slice[s+1:]...)
-}
-
-func delete_empty(s []string) []string {
-	var r []string
-	for _, str := range s {
-		if str != "" {
-			r = append(r, str)
-		}
-	}
-	return r
-}
-
-func split(r rune) bool {
-	return r == ' ' || r == '(' || r == ')'
 }

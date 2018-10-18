@@ -1,16 +1,16 @@
 package types
 
-type TyVal int
+type TyVal int64
 
 const (
-	TY_NIL  TyVal = iota // This is an empty type, as a default for values with as-of-yet-undetermined types
-	TY_INT  TyVal = iota
-	TY_STR  TyVal = iota
-	TY_BOOL TyVal = iota
-	TY_ARR  TyVal = iota
-	TY_MAP  TyVal = iota
-	TY_FUNC TyVal = iota
-	TY_STRC TyVal = iota
+	TY_NIL TyVal = iota // This is an empty type, as a default for values with as-of-yet-undetermined types
+	TY_INT
+	TY_STR
+	TY_BOOL
+	TY_ARR
+	TY_MAP
+	TY_FUNC
+	TY_STRC
 )
 
 type TypeNote struct {
