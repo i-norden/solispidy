@@ -1,0 +1,3 @@
+[solispidy]
+input = "./examples"
+output = "./output_files"

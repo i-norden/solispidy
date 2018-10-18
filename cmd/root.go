@@ -22,9 +22,6 @@ var (
 var rootCmd = &cobra.Command{
 	Use:              "solispidy",
 	PersistentPreRun: configure,
-	Run: func(cmd *cobra.Command, args []string) {
-		loadSourceFiles()
-	},
 }
 
 func Execute() {
@@ -43,13 +40,17 @@ func configure(cmd *cobra.Command, args []string) {
 	}
 
 	viper.Set("solispidy.config", fileConfig)
+
+	loadSourceFiles()
 }
 
 func init() {
 
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "environment/public.toml", "config file location")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "environments/example.toml", "config file location")
+	rootCmd.PersistentFlags().String("input", "./examples", "solispidy input")
+	rootCmd.PersistentFlags().String("output", "./output_files", "solispidy output")
 
 	viper.BindPFlag("solispidy.input", rootCmd.PersistentFlags().Lookup("input"))
 	viper.BindPFlag("solispidy.output", rootCmd.PersistentFlags().Lookup("output"))
@@ -85,6 +86,9 @@ func loadSourceFiles() {
 
 	for _, file := range inputFiles {
 		fileName := file.Name()
+		fileName = fmt.Sprintf("%s/%s", fileConfig.Input, fileName)
+		fmt.Fprintf(os.Stderr, "file name: %v\r\n", fileName)
+
 		text, err := ioutil.ReadFile(fileName)
 		if err != nil {
 			log.Fatal(err)
@@ -92,4 +96,5 @@ func loadSourceFiles() {
 
 		sourceFiles = append(sourceFiles, string(text))
 	}
+
 }

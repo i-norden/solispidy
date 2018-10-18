@@ -6,10 +6,6 @@ import (
 	"strings"
 )
 
-
-
-
-
 func PrettyPrint(i interface{}) string {
 	s, _ := json.MarshalIndent(i, "", "\t")
 	return string(s)
@@ -42,9 +38,7 @@ func Split(r rune) bool {
 	return r == ' ' || r == '(' || r == ')'
 }
 
-
-
-func LineError(l int64, err string) error{
+func LineError(l int64, err string) error {
 	errhead := fmt.Sprintf("On Line %i:\n  ", l)
 	// The replace is there for indentation; it shifts the error message over by 2 spaces.
 	return fmt.Errorf(errhead, strings.Replace(err, "\n", "  \n", -1))

@@ -2,7 +2,7 @@
 ; A simple contract allowing users to add and subtract a shared counter
 (def-contract Counter
 
-  (defpub Uint account 0)
+  (defpub String name "Ian")
 
   (defn incAccount
     ((Uint amount))

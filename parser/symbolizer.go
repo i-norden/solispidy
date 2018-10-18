@@ -86,8 +86,6 @@ func carlist(ast *types.AST) []*types.Symbol {
 	return ret
 }
 
-
-
 func checkGenericNode(ast *types.AST, fnsym string) bool {
 	if ast.Here == nil {
 		return false
@@ -111,14 +109,9 @@ func pullFnSymbol(ast *types.AST) (string, bool) {
 	}
 }
 
-
-
-
-
-
-func CheckFile(asts []types.AST) ([]types.ContractNode, []error){
+func CheckFile(asts []types.AST) ([]types.ContractNode, []error) {
 	var retContracts []types.ContractNode
-	var retErrors    []error
+	var retErrors []error
 
 	for _, ast := range asts {
 		if checkGenericNode(&ast, "def-contract") {
@@ -127,9 +120,9 @@ func CheckFile(asts []types.AST) ([]types.ContractNode, []error){
 				retContracts = append(retContracts, *contract)
 			}
 			if errs != nil {
-				retErrors    = append(retErrors, errs...)
+				retErrors = append(retErrors, errs...)
 			}
-		}else{
+		} else {
 			retErrors = append(retErrors, errors.New("Improperly defined contract"))
 		}
 	}
@@ -140,8 +133,7 @@ func CheckFile(asts []types.AST) ([]types.ContractNode, []error){
 	return retContracts, retErrors
 }
 
-
-func tryContract(ast *types.AST) (*types.ContractNode, []error){
+func tryContract(ast *types.AST) (*types.ContractNode, []error) {
 
 	var retErrors []error
 

@@ -19,9 +19,9 @@ import (
 
 	"github.com/spf13/cobra"
 
+	"github.com/i-norden/solispidy/common/utils"
 	"github.com/i-norden/solispidy/parser"
 	"github.com/i-norden/solispidy/types"
-	"github.com/i-norden/solispidy/common/utils"
 )
 
 // createASTCmd represents the createAST command
