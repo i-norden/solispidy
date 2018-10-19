@@ -17,6 +17,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 	"log"
+	"fmt"
+	"errors"
 
 	"github.com/i-norden/solispidy/parser"
 	symbolizer "github.com/i-norden/solispidy/symbolizer"
@@ -68,10 +70,13 @@ func compile() {
 		asts = append(asts, *p.Ast)
 	}
 
-	_, err := symbolizer.CheckFile(asts)
+	_, errs := symbolizer.CheckFile(asts)
 
-	if err != nil {
-		log.Fatal(err)
+	if errs != nil {
+		for _, err := range errs {
+			fmt.Println(err)
+		}
+		log.Fatal(errors.New("Unable to compile due to above errors."))
 	}
 
 }

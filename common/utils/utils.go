@@ -42,7 +42,7 @@ func Split(r rune) bool {
 }
 
 func LineError(l int64, err string) error {
-	errhead := fmt.Sprintf("On Line %i:\n  ", l)
+	errhead := fmt.Sprintf("On Line %d:\n  ", l)
 	// The replace is there for indentation; it shifts the error message over by 2 spaces.
-	return fmt.Errorf(errhead, strings.Replace(err, "\n", "  \n", -1))
+	return fmt.Errorf("%s %s", errhead, strings.Replace(err, "\n", "  \n", -1))
 }
