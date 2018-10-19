@@ -85,6 +85,11 @@ func MakeAST(symbols []types.Symbol, ast types.AST, count int) (*types.AST, erro
 	switch t := symbol.(type) {
 	case types.LeftPar:
 		count += 1
+		here, err := MakeAST(symbols, ast, count)
+		if err != nil {
+			return nil, err
+		}
+		ast.Here = here
 		return MakeAST(symbols, ast, count)
 	case types.RightPar:
 		count -= 1
