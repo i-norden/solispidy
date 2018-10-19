@@ -6,9 +6,12 @@ import (
 	"strings"
 )
 
-func PrettyPrint(i interface{}) string {
-	s, _ := json.MarshalIndent(i, "", "\t")
-	return string(s)
+func PrettyPrint(i interface{}) {
+	s, err := json.MarshalIndent(i, "", "\t")
+	if err != nil {
+		return
+	}
+	println(string(s))
 }
 
 func Find(a []string, x string) int {

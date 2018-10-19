@@ -15,10 +15,10 @@
 package cmd
 
 import (
+	"github.com/i-norden/solispidy/common/utils"
 	"github.com/spf13/cobra"
 	"log"
 
-	"github.com/i-norden/solispidy/common/utils"
 	"github.com/i-norden/solispidy/parser"
 )
 
@@ -56,7 +56,6 @@ func createAST() {
 			log.Fatal(err)
 		}
 
-		str := utils.PrettyPrint(p.Ast)
-		println(str)
+		utils.PrettyPrint(p.Ast)
 	}
 }

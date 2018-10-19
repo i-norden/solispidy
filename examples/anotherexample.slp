@@ -4,6 +4,6 @@
 
   (defpub Uint var 0)
   (defn checkvar
-    ()
+    (defn String var "hello")
     var)
 )
