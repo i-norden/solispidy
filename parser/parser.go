@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/i-norden/solispidy/common/utils"
-	"github.com/i-norden/solispidy/types"
+	"github.com/i-norden/solispidy/parser/types"
 )
 
 // recognize unclosed paranthesis
@@ -83,26 +83,24 @@ func MakeAST(symbols []types.Symbol, ast types.AST, count int) (*types.AST, erro
 	symbols = symbols[1:]
 
 	switch t := symbol.(type) {
-	case types.LeftPar:
+	case *types.LeftPar:
 		count += 1
 		here, err := MakeAST(symbols, ast, count)
 		if err != nil {
 			return nil, err
 		}
-		ast.Here = here
+		ast.Here = *here
 		return MakeAST(symbols, ast, count)
-	case types.RightPar:
+	case *types.RightPar:
 		count -= 1
 		if count == 0 {
 			ast.Next = nil
 			return &ast, nil
 		}
 		return MakeAST(symbols, ast, count)
-	case types.AssertNode:
-		fmt.Fprintf(os.Stderr, "Type: %v\r\n", t)
-		return nil, nil
 	default:
-		ast.Here = &symbol
+		fmt.Fprintf(os.Stderr, "type: %v\r\n", t)
+		ast.Here = symbol
 		next, err := MakeAST(symbols, types.AST{}, count)
 		if err != nil {
 			return nil, err
@@ -142,22 +140,22 @@ func sanitize(program string) (linesOfInterest Lines, err error) {
 
 func atom(token string, ln int64) types.Symbol {
 	if token == "(" {
-		return types.LeftPar{LPId: 1, Line: ln}
+		return &types.LeftPar{LPId: 1, Line: ln}
 	}
 	if token == ")" {
-		return types.RightPar{RPId: 1, Line: ln}
+		return &types.RightPar{RPId: 1, Line: ln}
 	}
 	if token == "False" || token == "false" {
-		return types.CnstBool{Data: false, Line: ln}
+		return &types.CnstBool{Data: false, Line: ln}
 	}
 	if token == "True" || token == "true" {
-		return types.CnstBool{Data: true, Line: ln}
+		return &types.CnstBool{Data: true, Line: ln}
 	}
 
 	i, err := strconv.ParseInt(token, 10, 64)
 	if err != nil {
-		return types.CnstStr{Data: token, Line: ln}
+		return &types.CnstStr{Data: token, Line: ln}
 	}
 	ui := uint64(i)
-	return types.CnstInt{Data: [4]uint64{ui}, Line: ln}
+	return &types.CnstInt{Data: [4]uint64{ui}, Line: ln}
 }

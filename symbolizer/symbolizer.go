@@ -3,7 +3,9 @@ package parser
 import (
 	"errors"
 	//"../types"
-	"github.com/i-norden/solispidy/types"
+	symbol "github.com/i-norden/solispidy/common/types"
+	ast1 "github.com/i-norden/solispidy/parser/types"
+	ast2 "github.com/i-norden/solispidy/symbolizer/types"
 )
 
 /*
@@ -46,9 +48,9 @@ import (
 
 // cdr is an old lisp function that returns the "next" value in a list
 // cdrlist returns an array of the next val, next of that, etc.
-func cdrlist(ast *types.AST) []*types.AST {
+func cdrlist(ast *ast1.AST) []*ast1.AST {
 	i := ast.Next
-	var ret []*types.AST
+	var ret []*ast1.AST
 	for i != nil {
 		ret = append(ret, i)
 		i = i.Next
@@ -56,9 +58,9 @@ func cdrlist(ast *types.AST) []*types.AST {
 	return ret
 }
 
-func cdarlist(ast *types.AST) []*types.Symbol {
+func cdarlist(ast *ast1.AST) []*symbol.Symbol {
 	i := ast.Next
-	var ret []*types.Symbol
+	var ret []*symbol.Symbol
 	for i != nil {
 		ret = append(ret, i.Here)
 		i = i.Next
@@ -66,9 +68,9 @@ func cdarlist(ast *types.AST) []*types.Symbol {
 	return ret
 }
 
-func nodelist(ast *types.AST) []*types.AST {
+func nodelist(ast *ast1.AST) []*ast1.AST {
 	i := ast
-	var ret []*types.AST
+	var ret []*ast1.AST
 	for i != nil {
 		ret = append(ret, i)
 		i = i.Next
@@ -76,9 +78,9 @@ func nodelist(ast *types.AST) []*types.AST {
 	return ret
 }
 
-func carlist(ast *types.AST) []*types.Symbol {
+func carlist(ast *ast1.AST) []*symbol.Symbol {
 	i := ast
-	var ret []*types.Symbol
+	var ret []*symbol.Symbol
 	for i != nil {
 		ret = append(ret, i.Here)
 		i = i.Next
@@ -86,12 +88,12 @@ func carlist(ast *types.AST) []*types.Symbol {
 	return ret
 }
 
-func checkGenericNode(ast *types.AST, fnsym string) bool {
+func checkGenericNode(ast *ast1.AST, fnsym string) bool {
 	if ast.Here == nil {
 		return false
 	}
 	here := *ast.Here
-	if val, ok := here.(types.FnSymbol); ok {
+	if val, ok := here.(ast1.FnSymbol); ok {
 		if val.Symbol == fnsym {
 			return true
 		}
@@ -100,17 +102,17 @@ func checkGenericNode(ast *types.AST, fnsym string) bool {
 	return false
 }
 
-func pullFnSymbol(ast *types.AST) (string, bool) {
+func pullFnSymbol(ast *ast1.AST) (string, bool) {
 	here := *ast.Next.Here
-	if val, ok := here.(types.FnSymbol); ok {
+	if val, ok := here.(ast1.FnSymbol); ok {
 		return val.Symbol, ok
 	} else {
 		return "", false
 	}
 }
 
-func CheckFile(asts []types.AST) ([]types.ContractNode, []error) {
-	var retContracts []types.ContractNode
+func CheckFile(asts []ast1.AST) ([]ast2.ContractNode, []error) {
+	var retContracts []ast2.ContractNode
 	var retErrors []error
 
 	for _, ast := range asts {
@@ -128,12 +130,12 @@ func CheckFile(asts []types.AST) ([]types.ContractNode, []error) {
 	}
 
 	if len(retErrors) != 0 {
-		retContracts = make([]types.ContractNode, 0)
+		retContracts = make([]ast2.ContractNode, 0)
 	}
 	return retContracts, retErrors
 }
 
-func tryContract(ast *types.AST) (*types.ContractNode, []error) {
+func tryContract(ast *ast1.AST) (*ast2.ContractNode, []error) {
 
 	var retErrors []error
 
@@ -142,18 +144,18 @@ func tryContract(ast *types.AST) (*types.ContractNode, []error) {
 	return nil, retErrors
 }
 
-func checkField(ast *types.AST, tyid string) (*types.FieldNode, error) {
+func checkField(ast *ast1.AST, tyid string) (*ast2.FieldNode, error) {
 	if ast.Next == nil {
 		return nil, errors.New("Expected a field definition with two elements, not one.")
 	}
 
 	// This needs to be more complex to handle compound types (mapping, array, etc.).
 	here := *ast.Next.Here
-	if _, ok := here.(types.TySymbol); ok {
-		var ret types.FieldNode
+	if _, ok := here.(ast1.TySymbol); ok {
+		var ret ast2.FieldNode
 		ret.TyIn = tyid
-		ret.TyEx = types.TY_NIL // For now
-		if fun, ok := here.(types.FnSymbol); ok {
+		ret.TyEx = ast2.TY_NIL // For now
+		if fun, ok := here.(ast1.FnSymbol); ok {
 			ret.Symbol = fun.Symbol
 		} else {
 			return nil, errors.New("Expected a field definition with a valid field name.")

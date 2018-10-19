@@ -21,7 +21,7 @@ import (
 
 	"github.com/i-norden/solispidy/common/utils"
 	"github.com/i-norden/solispidy/parser"
-	"github.com/i-norden/solispidy/types"
+	"github.com/i-norden/solispidy/parser/types"
 )
 
 // createASTCmd represents the createAST command
