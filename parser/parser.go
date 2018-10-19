@@ -2,19 +2,17 @@ package parser
 
 import (
 	"errors"
-	"fmt"
-	"os"
-	"strconv"
-	"strings"
-
 	"github.com/i-norden/solispidy/common/utils"
 	"github.com/i-norden/solispidy/parser/types"
+	"strconv"
+	"strings"
 )
 
 // recognize unclosed paranthesis
 // recognize strings
 // identify any capitalized word as type
 
+// Types to represent program line-by-line
 type Line struct {
 	Text   string
 	Tokens []string
@@ -23,36 +21,128 @@ type Line struct {
 
 type Lines []*Line
 
-func Tokenize(program string) (linesOfInterest Lines, err error) {
-
-	linesOfInterest, err = sanitize(program)
-
-	for _, line := range linesOfInterest {
-		var tempStr string
-		tempStr = strings.Replace(line.Text, "(", "( ", -1)
-		tempStr = strings.Replace(tempStr, ")", " )", -1)
-		line.Tokens = strings.Split(tempStr, " ")
-		line.Tokens = utils.DeleteEmpty(line.Tokens)
-	}
-
-	return linesOfInterest, nil
+// Parser struct to hold symbols and resulting ast as
+// well as current index within the symbols array
+type Parser struct {
+	Symbols []types.Symbol
+	Ast     *types.AST
+	index   int
 }
 
-func ReadFromLines(lines Lines) ([]types.Symbol, error) {
-	var tokens []types.Symbol
+// Exported parser method that sanitizes and creates
+func (p *Parser) Parse(program string) (err error) {
+	lines, err := createLines(program)
+	if err != nil {
+		return err
+	}
 
-	for _, line := range lines {
-		parsedTokens, err := ReadFromTokens(line.Tokens, line.Number)
+	tokens, err := readFromLines(lines)
+	if err != nil {
+		return err
+	}
+
+	p.Symbols = tokens
+	p.Ast = &types.AST{}
+	p.index = 0
+
+	p.Ast, err = p.makeAST(types.AST{}, 0)
+	if err != nil {
+		p.Ast = nil
+		return err
+	}
+
+	return nil
+}
+
+// Internal parser method used recursively to parse a program
+func (p *Parser) makeAST(ast types.AST, count int) (*types.AST, error) {
+	symbol := p.Symbols[p.index]
+	p.index++
+
+	switch symbol.(type) {
+	case *types.LeftPar:
+		count += 1
+		if count > 1 {
+			count = 1
+			here, err := p.makeAST(types.AST{}, count)
+			if err != nil {
+				return nil, err
+			}
+			ast.Here = here
+
+			next, err := p.makeAST(types.AST{}, count)
+			if err != nil {
+				return nil, err
+			}
+			ast.Next = next
+
+			return &ast, nil
+		}
+
+		return p.makeAST(ast, count)
+	case *types.RightPar:
+		count -= 1
+		if count == 0 {
+			ast.Next = nil
+			return &ast, nil
+		}
+
+		return p.makeAST(ast, count)
+	default:
+		ast.Here = symbol
+
+		next, err := p.makeAST(types.AST{}, count)
 		if err != nil {
 			return nil, err
 		}
-		tokens = append(tokens, parsedTokens...)
+		ast.Next = next
+
+		return &ast, nil
+	}
+}
+
+// Helper functions
+
+// Function to cast token to matching symbol
+func atom(token string, ln int64) types.Symbol {
+	if token == "(" {
+		return &types.LeftPar{LPId: 1, Line: ln}
+	}
+	if token == ")" {
+		return &types.RightPar{RPId: 1, Line: ln}
+	}
+	if token == "False" || token == "false" {
+		return &types.CnstBool{Data: false, Line: ln}
+	}
+	if token == "True" || token == "true" {
+		return &types.CnstBool{Data: true, Line: ln}
+	}
+
+	i, err := strconv.ParseInt(token, 10, 64)
+	if err != nil {
+		return &types.CnstStr{Data: token, Line: ln}
+	}
+	ui := uint64(i)
+	return &types.CnstInt{Data: [4]uint64{ui}, Line: ln}
+}
+
+// Functions to read program line-by-line and
+// and convert raw tokens to typed symbols
+func readFromLines(lines Lines) ([]types.Symbol, error) {
+	var tokens []types.Symbol
+
+	for _, line := range lines {
+		symbols, err := readFromTokens(line.Tokens, line.Number)
+		if err != nil {
+			return nil, err
+		}
+		tokens = append(tokens, symbols...)
 	}
 
 	return tokens, nil
 }
 
-func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
+func readFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
 	if len(tokens) == 0 {
 		return nil, errors.New("Unexpected EOF")
 	}
@@ -78,36 +168,21 @@ func ReadFromTokens(tokens []string, ln int64) ([]types.Symbol, error) {
 	return result, nil
 }
 
-func MakeAST(symbols []types.Symbol, ast types.AST, count int) (*types.AST, error) {
-	symbol := symbols[0]
-	symbols = symbols[1:]
+// Functions to sanitize program and cut
+// it up into a slice of lines
+func createLines(program string) (linesOfInterest Lines, err error) {
 
-	switch t := symbol.(type) {
-	case *types.LeftPar:
-		count += 1
-		here, err := MakeAST(symbols, ast, count)
-		if err != nil {
-			return nil, err
-		}
-		ast.Here = *here
-		return MakeAST(symbols, ast, count)
-	case *types.RightPar:
-		count -= 1
-		if count == 0 {
-			ast.Next = nil
-			return &ast, nil
-		}
-		return MakeAST(symbols, ast, count)
-	default:
-		fmt.Fprintf(os.Stderr, "type: %v\r\n", t)
-		ast.Here = symbol
-		next, err := MakeAST(symbols, types.AST{}, count)
-		if err != nil {
-			return nil, err
-		}
-		ast.Next = next
-		return &ast, nil
+	linesOfInterest, err = sanitize(program)
+
+	for _, line := range linesOfInterest {
+		var tempStr string
+		tempStr = strings.Replace(line.Text, "(", "( ", -1)
+		tempStr = strings.Replace(tempStr, ")", " )", -1)
+		line.Tokens = strings.Split(tempStr, " ")
+		line.Tokens = utils.DeleteEmpty(line.Tokens)
 	}
+
+	return linesOfInterest, nil
 }
 
 func sanitize(program string) (linesOfInterest Lines, err error) {
@@ -136,26 +211,4 @@ func sanitize(program string) (linesOfInterest Lines, err error) {
 	}
 
 	return
-}
-
-func atom(token string, ln int64) types.Symbol {
-	if token == "(" {
-		return &types.LeftPar{LPId: 1, Line: ln}
-	}
-	if token == ")" {
-		return &types.RightPar{RPId: 1, Line: ln}
-	}
-	if token == "False" || token == "false" {
-		return &types.CnstBool{Data: false, Line: ln}
-	}
-	if token == "True" || token == "true" {
-		return &types.CnstBool{Data: true, Line: ln}
-	}
-
-	i, err := strconv.ParseInt(token, 10, 64)
-	if err != nil {
-		return &types.CnstStr{Data: token, Line: ln}
-	}
-	ui := uint64(i)
-	return &types.CnstInt{Data: [4]uint64{ui}, Line: ln}
 }

@@ -15,13 +15,11 @@
 package cmd
 
 import (
-	"log"
-
 	"github.com/spf13/cobra"
+	"log"
 
 	"github.com/i-norden/solispidy/common/utils"
 	"github.com/i-norden/solispidy/parser"
-	"github.com/i-norden/solispidy/parser/types"
 )
 
 // createASTCmd represents the createAST command
@@ -50,21 +48,15 @@ func init() {
 
 func createAST() {
 	for _, text := range sourceFiles {
-		lines, err := parser.Tokenize(text)
+
+		p := new(parser.Parser)
+
+		err := p.Parse(text)
 		if err != nil {
 			log.Fatal(err)
-			return
-		} else {
-			tokens, err := parser.ReadFromLines(lines)
-			if err != nil {
-				log.Fatal(err)
-			}
-			ast, err := parser.MakeAST(tokens, types.AST{}, 0)
-			if err != nil {
-				log.Fatal(err)
-			}
-			str := utils.PrettyPrint(ast)
-			println(str)
 		}
+
+		str := utils.PrettyPrint(p.Ast)
+		println(str)
 	}
 }
