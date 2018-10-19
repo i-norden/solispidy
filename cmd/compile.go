@@ -16,14 +16,21 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"log"
+
+	"github.com/i-norden/solispidy/parser"
+	symbolizer "github.com/i-norden/solispidy/symbolizer"
+
+	ast1 "github.com/i-norden/solispidy/parser/types"
+	//ast2 "github.com/i-norden/solispidy/symbolizer/types"
 )
 
 // compileCmd represents the compile command
 var compileCmd = &cobra.Command{
 	Use:   "compile",
 	Short: "Compiles input file into solidity",
-	Long: `Parses the input file into an AST that is then used 
-to undergo formal verification of the input code. If the code 
+	Long: `Parses the input file into an AST that is then used
+to undergo formal verification of the input code. If the code
 passes formal verification it is optimized for gas consumption
 and compiled down to solidity for contract publication.`,
 	Run: func(cmd *cobra.Command, args []string) {
@@ -46,5 +53,25 @@ func init() {
 }
 
 func compile() {
+
+	var asts []ast1.AST
+
+	for _, text := range sourceFiles {
+
+		p := new(parser.Parser)
+
+		err := p.Parse(text)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		asts = append(asts, *p.Ast)
+	}
+
+	_, err := symbolizer.CheckFile(asts)
+
+	if err != nil {
+		log.Fatal(err)
+	}
 
 }
