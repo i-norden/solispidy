@@ -77,6 +77,8 @@ func compile() {
 			fmt.Println(err)
 		}
 		log.Fatal(errors.New("Unable to compile due to above errors."))
+	}else{
+		fmt.Println("Success")
 	}
 
 }

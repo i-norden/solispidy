@@ -5,6 +5,7 @@ import (
 	//"../types"
 	ast1 "github.com/i-norden/solispidy/parser/types"
 	ast2 "github.com/i-norden/solispidy/symbolizer/types"
+	"github.com/i-norden/solispidy/common/utils"
 )
 
 /*
@@ -55,10 +56,16 @@ func checkGenericNode(ast *ast1.AST, fnsym string) bool {
 		if val.Symbol == fnsym {
 			return true
 		}
+	}else if val, ok := ast.Here.(*ast1.TySymbol); ok {
+		if val.Symbol == fnsym {
+			return true
+		}
 	}
 
 	return false
 }
+
+
 
 func pullFnSymbol(ast *ast1.AST) (string, bool) {
 	if val, ok := ast.Next.Here.(*ast1.FnSymbol); ok {
@@ -67,6 +74,8 @@ func pullFnSymbol(ast *ast1.AST) (string, bool) {
 		return "", false
 	}
 }
+
+
 
 func CheckFile(asts []ast1.AST) ([]ast2.ContractNode, []error) {
 	var retContracts []ast2.ContractNode
@@ -82,7 +91,7 @@ func CheckFile(asts []ast1.AST) ([]ast2.ContractNode, []error) {
 				retErrors = append(retErrors, errs...)
 			}
 		} else {
-			retErrors = append(retErrors, errors.New("Improperly defined contract"))
+			retErrors = append(retErrors, utils.LineError(ast.GetLine(), "Improperly defined contract"))
 		}
 	}
 
@@ -92,14 +101,33 @@ func CheckFile(asts []ast1.AST) ([]ast2.ContractNode, []error) {
 	return retContracts, retErrors
 }
 
+
+
 func tryContract(ast *ast1.AST) (*ast2.ContractNode, []error) {
 
 	var retErrors []error
+	var retContract ast2.ContractNode
 
 	// Check contents of contract expression
+	if ast.Next != nil {
+		if val, ok := ast.Next.Here.(*ast1.TySymbol); ok {
+			retContract.Symbol = val.Symbol
+			retContract.Line   = ast.GetLine()
+
+			// Check internal definitions
+
+			return &retContract, retErrors
+		}else{
+			retErrors = append(retErrors, errors.New("Contract has no valid name."))
+		}
+	}else{
+		retErrors = append(retErrors, errors.New("Contract header has no contents."))
+	}
 
 	return nil, retErrors
 }
+
+
 
 func checkField(ast *ast1.AST, tyid string) (*ast2.FieldNode, error) {
 	if ast.Next == nil {
