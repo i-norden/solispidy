@@ -120,6 +120,15 @@ func atom(token string, ln int64) types.Symbol {
 
 	i, err := strconv.ParseInt(token, 10, 64)
 	if err != nil {
+		firstChar := token[0]
+		if firstChar < 'A' || firstChar > 'Z' {
+			return &types.FnSymbol{Symbol: token, Line: ln}
+		}else if firstChar != '"' {
+			return &types.TySymbol{Symbol: token, Line: ln}
+		}
+
+		// We need to verify somewhere that any string that starts with quotes also
+		// a
 		return &types.CnstStr{Data: token, Line: ln}
 	}
 	ui := uint64(i)
