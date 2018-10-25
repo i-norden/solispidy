@@ -16,7 +16,7 @@ import (
 var (
 	cfgFile     string
 	fileConfig  config.Config
-	sourceFiles []string
+	sourceFiles map[string]string
 )
 
 var rootCmd = &cobra.Command{
@@ -79,6 +79,8 @@ func initConfig() {
 
 func loadSourceFiles() {
 
+	sourceFiles = make(map[string]string)
+
 	inputFiles, err := ioutil.ReadDir(fileConfig.Input)
 	if err != nil {
 		log.Fatal(err)
@@ -94,7 +96,8 @@ func loadSourceFiles() {
 			log.Fatal(err)
 		}
 
-		sourceFiles = append(sourceFiles, string(text))
+		//sourceFiles = append(sourceFiles, string(text))
+		sourceFiles[fileName] = string(text)
 	}
 
 }

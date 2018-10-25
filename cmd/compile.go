@@ -56,9 +56,9 @@ func init() {
 
 func compile() {
 
-	var asts []ast1.AST
+	asts := make(map[string]ast1.AST)
 
-	for _, text := range sourceFiles {
+	for fname, text := range sourceFiles {
 
 		p := new(parser.Parser)
 
@@ -67,7 +67,7 @@ func compile() {
 			log.Fatal(err)
 		}
 
-		asts = append(asts, *p.Ast)
+		asts[fname] = *p.Ast
 	}
 
 	_, errs := symbolizer.CheckFile(asts)

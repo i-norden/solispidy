@@ -6,6 +6,7 @@ import (
 	ast1 "github.com/i-norden/solispidy/parser/types"
 	ast2 "github.com/i-norden/solispidy/symbolizer/types"
 	"github.com/i-norden/solispidy/common/utils"
+	"fmt"
 )
 
 /*
@@ -77,20 +78,22 @@ func pullFnSymbol(ast *ast1.AST) (string, bool) {
 
 
 
-func CheckFile(asts []ast1.AST) ([]ast2.ContractNode, []error) {
+func CheckFile(asts map[string]ast1.AST) ([]ast2.ContractNode, []error) {
 	var retContracts []ast2.ContractNode
 	var retErrors []error
 
-	for _, ast := range asts {
+	for fname, ast := range asts {
 		if checkGenericNode(&ast, "def-contract") {
 			contract, errs := tryContract(&ast)
 			if contract != nil {
 				retContracts = append(retContracts, *contract)
 			}
 			if errs != nil {
+				retErrors = append(retErrors, fmt.Errorf("\nIn file: %s", fname))
 				retErrors = append(retErrors, errs...)
 			}
 		} else {
+			retErrors = append(retErrors, fmt.Errorf("\nIn file: %s", fname))
 			retErrors = append(retErrors, utils.LineError(ast.GetLine(), "Improperly defined contract"))
 		}
 	}
@@ -115,6 +118,23 @@ func tryContract(ast *ast1.AST) (*ast2.ContractNode, []error) {
 			retContract.Line   = ast.GetLine()
 
 			// Check internal definitions
+			def := ast
+			//nilast := ast1.AST{Next: nil, Here: nil}
+			for def.Next != nil && def.Next.Here != nil {
+				def = def.Next
+				if vl, ok := def.Here.(*ast1.AST); !ok || def.Here == nil {
+					retErrors = append(retErrors, utils.LineError(def.GetLine(), "Expected a definition (list) here."))
+				}else if fn, er := tryFunc(vl); er == nil{
+					retContract.Funcs = append(retContract.Funcs, *fn)
+				}else if ty, er := tryType(vl); er == nil{
+					retContract.Types = append(retContract.Types, *ty)
+				}else if vr, er := tryPublic(vl); er == nil{
+					retContract.Vars = append(retContract.Vars, *vr)
+				}else{
+					retErrors = append(retErrors, utils.LineError(def.GetLine(), "Expression not a function, type, assertion, or variable definition."))
+				}
+
+			}
 
 			return &retContract, retErrors
 		}else{
@@ -129,26 +149,94 @@ func tryContract(ast *ast1.AST) (*ast2.ContractNode, []error) {
 
 
 
-func checkField(ast *ast1.AST, tyid string) (*ast2.FieldNode, error) {
-	if ast.Next == nil {
-		return nil, errors.New("Expected a field definition with two elements, not one.")
+func tryFunc(ast *ast1.AST) (*ast2.FnNode, []error) {
+
+	var retErrors []error
+	var retFunc   ast2.FnNode
+
+	if !checkGenericNode(ast, "defn") {
+		retErrors = append(retErrors, utils.LineError(ast.GetLine(), "Improperly defined function"))
+		return nil, retErrors
 	}
 
-	// This needs to be more complex to handle compound types (mapping, array, etc.).
-	if _, ok := ast.Next.Here.(*ast1.TySymbol); ok {
-		var ret ast2.FieldNode
-		ret.TyIn = tyid
-		ret.TyEx = ast2.TY_NIL // For now
-		if fun, ok := ast.Next.Here.(*ast1.FnSymbol); ok {
-			ret.Symbol = fun.Symbol
-		} else {
-			return nil, errors.New("Expected a field definition with a valid field name.")
+	// Check contents of contract expression
+	if ast.Next != nil {
+		if val, ok := ast.Next.Here.(*ast1.FnSymbol); ok {
+			retFunc.Symbol = val.Symbol
+			retFunc.Line   = ast.GetLine()
+
+			// Check internal definitions
+
+			return &retFunc, retErrors
+		}else{
+			retErrors = append(retErrors, errors.New("Function has no valid name."))
 		}
-		if ast.Next.Next != nil {
-			return nil, errors.New("Expected a field definition with two elements, not three.")
-		}
-		return &ret, nil
+	}else{
+		retErrors = append(retErrors, errors.New("Function header has no contents."))
 	}
 
-	return nil, errors.New("Expected a field definition with a valid type.")
+	return nil, retErrors
+}
+
+
+
+func tryType(ast *ast1.AST) (*ast2.TyNode, []error) {
+
+	var retErrors []error
+	var retType   ast2.TyNode
+
+	if !checkGenericNode(ast, "defty") {
+		retErrors = append(retErrors, utils.LineError(ast.GetLine(), "Improperly defined struct"))
+		return nil, retErrors
+	}
+
+	// Check contents of contract expression
+	if ast.Next != nil {
+		if val, ok := ast.Next.Here.(*ast1.TySymbol); ok {
+			retType.Symbol = val.Symbol
+			retType.Line   = ast.GetLine()
+
+			// Check internal definitions
+
+			return &retType, retErrors
+		}else{
+			retErrors = append(retErrors, errors.New("Struct has no valid name."))
+		}
+	}else{
+		retErrors = append(retErrors, errors.New("Struct header has no contents."))
+	}
+
+	return nil, retErrors
+}
+
+
+
+
+func tryPublic(ast *ast1.AST) (*ast2.VarNode, []error) {
+
+	var retErrors []error
+	var retVar    ast2.VarNode
+
+	if !checkGenericNode(ast, "defpub") {
+		retErrors = append(retErrors, utils.LineError(ast.GetLine(), "Improperly defined variable"))
+		return nil, retErrors
+	}
+
+	// Check contents of contract expression
+	if ast.Next != nil {
+		if val, ok := ast.Next.Here.(*ast1.FnSymbol); ok {
+			retVar.Symbol = val.Symbol
+			retVar.Line   = ast.GetLine()
+
+			// Check internal definitions
+
+			return &retVar, retErrors
+		}else{
+			retErrors = append(retErrors, errors.New("Variable has no valid name."))
+		}
+	}else{
+		retErrors = append(retErrors, errors.New("Variable header has no contents."))
+	}
+
+	return nil, retErrors
 }
